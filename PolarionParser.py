@@ -8,6 +8,10 @@ from bs4 import BeautifulSoup
 moduleDict = dict()           # dict for all documents in repo
 workitemDict = dict()         # dict for all workitems in repo
 
+REMOVE_ATTRIBUTES = [
+    'style','font','size','color']
+
+
 def analyseFolderStruct():
    numberOfDocuments = 1
    for root, dirs, files in os.walk("."):
@@ -72,6 +76,14 @@ def getDescriptionFromWorkitem(id):
    else:
       return "WI not found"
 
+      
+def removeDefinedAttributes(soup):
+   ##https://stackoverflow.com/a/39976027
+   for tag in soup.recursiveChildGenerator():
+      if hasattr(tag, 'attrs'):
+         tag.attrs = {key:value for key,value in tag.attrs.iteritems() if key not in REMOVE_ATTRIBUTES}
+   return soup
+      
 ########################################################################################
 ########################################################################################
 ########################################################################################
@@ -133,6 +145,10 @@ for tag in soup:
       id = getIdFromString(str(tag.get('id')))
       if id:
          description = getDescriptionFromWorkitem(id)
+         
+         subsoup = BeautifulSoup(description, 'html.parser')
+         removeDefinedAttributes(subsoup)
+     
          ## https://stackoverflow.com/questions/17136127/calling-a-function-on-captured-group-in-re-sub
          #description = re.sub(r'<span class="polarion-rte-link" data-type="workItem" id="fake" data-item-id="([a-zA-Z]*-\d{1,6})" data-option-id="long"></span>', r'\1' + " - WI Title" , description)
          description = re.sub(r'<span class="polarion-rte-link" data-type="workItem" id="fake" data-item-id="([a-zA-Z]*-\d{1,6})" data-option-id="long"></span>', getIdAndTitleFromRegex , description)
@@ -140,7 +156,7 @@ for tag in soup:
          f.write("<b>")
          f.write(id + " " + getTitleFromWorkitem(id))
          f.write("</b></br>")
-         f.write(description)
+         f.write(subsoup.prettify().encode('utf-8'))
          f.write("</br>")
 
 f.close

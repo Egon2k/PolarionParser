@@ -45,6 +45,20 @@ def getTitleFromWorkitem(id):
    else:
       return "WI not found"
       
+      
+def getIdAndTitleFromRegex(match):
+   workitemTree = ET.parse(workitemDict[match.group(1)])
+   workitemRoot = workitemTree.getroot()
+   
+   for field in workitemRoot:
+      if field.get('id') == "title":
+         idTitle = "<font color=\"blue\">" + match.group(1) + " - " + field.text.encode('utf-8') + "</font>"
+         
+   if idTitle:
+      return idTitle
+   else:
+      return "WI not found"
+   
 def getDescriptionFromWorkitem(id):
    workitemTree = ET.parse(workitemDict[id])
    workitemRoot = workitemTree.getroot()
@@ -57,7 +71,7 @@ def getDescriptionFromWorkitem(id):
       return description
    else:
       return "WI not found"
-   
+
 ########################################################################################
 ########################################################################################
 ########################################################################################
@@ -118,34 +132,15 @@ for tag in soup:
    if str(tag.name).startswith('div'):                    # workitem
       id = getIdFromString(str(tag.get('id')))
       if id:
-         #description = getDescriptionFromWorkitem(id)
-         #linkedIds = getIdsFromString(description)
-         
-         #for linkedId in linkedIds:
-         #   #print description
-         #   #a = '<span class="polarion-rte-link" data-type="workItem" id="fake" data-item-id="' + linkedId + '" data-option-id="long"></span>'
-         #   #print description.replace(a,linkedId)
-         #   print linkedId
-         
-         #description = getDescriptionFromWorkitem(id)
-         #linkedIds = getIdsFromString(description)
-         #
-         #for linkedId in linkedIds:
-         #   a = '<span class="polarion-rte-link" data-type="workItem" id="fake" data-item-id="' + linkedId + '" data-option-id="long"></span>'
-         #   b = linkedId
-         #   description.replace(a,b)
-            
-         
-         #linkedId = re.search('<span class="polarion-rte-link" data-type="workItem" id="fake" data-item-id="(\w*-\d{1,6})" data-option-id="long"></span>', descriptionLines)
-         #print linkedIds
-         #
-         #for linkedId in linkedIds:
-         #   print linkedId
+         description = getDescriptionFromWorkitem(id)
+         ## https://stackoverflow.com/questions/17136127/calling-a-function-on-captured-group-in-re-sub
+         #description = re.sub(r'<span class="polarion-rte-link" data-type="workItem" id="fake" data-item-id="([a-zA-Z]*-\d{1,6})" data-option-id="long"></span>', r'\1' + " - WI Title" , description)
+         description = re.sub(r'<span class="polarion-rte-link" data-type="workItem" id="fake" data-item-id="([a-zA-Z]*-\d{1,6})" data-option-id="long"></span>', getIdAndTitleFromRegex , description)
          
          f.write("<b>")
          f.write(id + " " + getTitleFromWorkitem(id))
          f.write("</b></br>")
-         f.write(getDescriptionFromWorkitem(id))
+         f.write(description)
          f.write("</br>")
 
 f.close

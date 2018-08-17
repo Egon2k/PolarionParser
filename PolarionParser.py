@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ET
 import re
 import os
-import os.path
 from bs4 import BeautifulSoup
 
 # globals
@@ -10,6 +9,9 @@ workitemDict = dict()         # dict for all workitems in repo
 
 REMOVE_ATTRIBUTES = [
     'style','font','size','color']
+    
+EXCLUDE_FROM_ATTRIBUTE_REMOVAL = [
+    'table','tbody','tr','th','td']
 
 
 def analyseFolderStruct():
@@ -80,8 +82,9 @@ def getDescriptionFromWorkitem(id):
 def removeDefinedAttributes(soup):
    ##https://stackoverflow.com/a/39976027
    for tag in soup.recursiveChildGenerator():
-      if hasattr(tag, 'attrs'):
-         tag.attrs = {key:value for key,value in tag.attrs.iteritems() if key not in REMOVE_ATTRIBUTES}
+      if tag.name not in EXCLUDE_FROM_ATTRIBUTE_REMOVAL:
+         if hasattr(tag, 'attrs'):
+            tag.attrs = {key:value for key,value in tag.attrs.iteritems() if key not in REMOVE_ATTRIBUTES}
    return soup
       
 ########################################################################################
@@ -147,11 +150,31 @@ for tag in soup:
          description = getDescriptionFromWorkitem(id)
          
          subsoup = BeautifulSoup(description, 'html.parser')
-         removeDefinedAttributes(subsoup)
+         #removeDefinedAttributes(subsoup)
+         
+         #for subtag in subsoup:
+         #   if subtag.name == "span":
+         #      print "span found"
+         #      if hasattr(subtag, 'attrs'):
+         #         for subtag.attrs in subtag.attrs:
+         #           if subtag.attrs == "class":
+         #               print type(subtag.attrs)
+         #               print subtag.attrs
+         #               exit()
+
+         #print subsoup.find_all('span')
+         for span in subsoup.find_all('span'):
+            if span.get('data-item-id'):
+               # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#replace-with
+               new_tag = soup.new_tag("font color=\"blue\"")
+               new_tag.string = span.get('data-item-id') + " - " +  getTitleFromWorkitem(span.get('data-item-id'))
+               #print span.get('data-item-id')
+               span.replace_with(new_tag)
+         
      
          ## https://stackoverflow.com/questions/17136127/calling-a-function-on-captured-group-in-re-sub
          #description = re.sub(r'<span class="polarion-rte-link" data-type="workItem" id="fake" data-item-id="([a-zA-Z]*-\d{1,6})" data-option-id="long"></span>', r'\1' + " - WI Title" , description)
-         description = re.sub(r'<span class="polarion-rte-link" data-type="workItem" id="fake" data-item-id="([a-zA-Z]*-\d{1,6})" data-option-id="long"></span>', getIdAndTitleFromRegex , description)
+         #description = re.sub(r'<span class="polarion-rte-link" data-type="workItem" id="fake" data-item-id="([a-zA-Z]*-\d{1,6})" data-option-id="long"></span>', getIdAndTitleFromRegex , subsoup.encode('utf-8'))
          
          f.write("<b>")
          f.write(id + " " + getTitleFromWorkitem(id))

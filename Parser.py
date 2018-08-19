@@ -24,12 +24,17 @@ def _analyseFolderStruct():
                     workitemDict[id.group(1)] = os.path.join(root, file)
                     #print id.group(1), os.path.join(root, file)
 
-def _getFieldById(soup, idName):
-    value = soup.find("field", id=idName)
+def _getFieldByAttrName(soup, attrName):
+    value = soup.find("field", id=attrName)
     if value:
         return value.text.encode('utf-8')
     else:
-        return "id \"" + idName + "\" not found"
+        return "id \"" + attrName + "\" not found"
+
+def _getTitleFromId(id):
+    workitemSoup = BeautifulSoup(open(workitemDict[id]), 'html.parser')
+    return _getFieldByAttrName(workitemSoup, "title")
+
 
 def _getIdFromString(string):
    id = re.search('([a-zA-Z]*-\d{1,6})', string)
@@ -39,22 +44,22 @@ def _getIdFromString(string):
 def _printHeading(id, headingLevel):
     workitemSoup = BeautifulSoup(open(workitemDict[id]), 'html.parser')
     f.write("<"  + headingLevel + ">")
-    f.write(_getFieldById(workitemSoup, "title"))
+    f.write(_getFieldByAttrName(workitemSoup, "title"))
     f.write("</" + headingLevel + ">")
 
 def _printWorkitem(id):
     workitemSoup = BeautifulSoup(open(workitemDict[id]), 'html.parser')
     f.write("<p>")
     f.write("<div style=\"border: thin solid black\">")
-    f.write("<b>" + id + " - " + _getFieldById(workitemSoup, "title") + "</b></br>")       # id + title in bold
+    f.write("<b>" + id + " - " + _getFieldByAttrName(workitemSoup, "title") + "</b></br>")       # id + title in bold
     
-    descriptionSoup = BeautifulSoup(_getFieldById(workitemSoup, "description"), 'html.parser')
+    descriptionSoup = BeautifulSoup(_getFieldByAttrName(workitemSoup, "description"), 'html.parser')
     
     for linkedWorkitem in descriptionSoup.find_all('span'):
         if linkedWorkitem.get('data-item-id'):
            # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#replace-with
            new_tag = descriptionSoup.new_tag("font color=\"blue\"")
-           new_tag.string = linkedWorkitem.get('data-item-id') + " - " +  _getFieldById(workitemSoup, "title")
+           new_tag.string = linkedWorkitem.get('data-item-id') + " - " +  _getTitleFromId(linkedWorkitem.get('data-item-id'))
            #print linkedWorkitem.get('data-item-id')
            linkedWorkitem.replace_with(new_tag)
            
@@ -97,10 +102,10 @@ except ValueError:
     
 if 0 < selectedModule < len(moduleDict):
     moduleSoup = BeautifulSoup(open(moduleDict[selectedModule]), 'html.parser')
-    print "Author: " + _getFieldById(moduleSoup, "author")
-    print "Created: " + _getFieldById(moduleSoup, "created")
+    print "Author: " + _getFieldByAttrName(moduleSoup, "author")
+    print "Created: " + _getFieldByAttrName(moduleSoup, "created")
     
-    contentSoup = BeautifulSoup(_getFieldById(moduleSoup, "homePageContent"), 'html.parser')
+    contentSoup = BeautifulSoup(_getFieldByAttrName(moduleSoup, "homePageContent"), 'html.parser')
     
     f = open("index.html", 'w')
     

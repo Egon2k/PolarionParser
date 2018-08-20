@@ -9,6 +9,13 @@ import os
 moduleDict = dict()              # dict for all documents in repo
 workitemDict = dict()            # dict for all workitems in repo
 
+REMOVE_ATTRIBUTES = [
+    'style','font','size','color']
+    
+EXCLUDE_FROM_ATTRIBUTE_REMOVAL = [
+    'table','tbody','tr','th','td']
+
+
 def _analyseFolderStruct():
     numberOfDocuments = 1
     for root, dirs, files in os.walk("."):
@@ -54,6 +61,7 @@ def _printWorkitem(id):
     f.write("<b>" + id + " - " + _getFieldByAttrName(workitemSoup, "title") + "</b></br>")       # id + title in bold
     
     descriptionSoup = BeautifulSoup(_getFieldByAttrName(workitemSoup, "description"), 'html.parser')
+    descriptionSoup = _removeDefinedAttributes(descriptionSoup)
     
     for linkedWorkitem in descriptionSoup.find_all('span'):
         if linkedWorkitem.get('data-item-id'):
@@ -79,6 +87,14 @@ def _parseModuleTag(moduleTag):
             _printWorkitem(id)
     else:                                                   # ignore these tags
         pass
+
+def _removeDefinedAttributes(soup):
+   ##https://stackoverflow.com/a/39976027
+   for tag in soup.recursiveChildGenerator():
+      if tag.name not in EXCLUDE_FROM_ATTRIBUTE_REMOVAL:
+         if hasattr(tag, 'attrs'):
+            tag.attrs = {key:value for key,value in tag.attrs.iteritems() if key not in REMOVE_ATTRIBUTES}
+   return soup        
     
     
 ##################################################################################

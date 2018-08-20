@@ -85,6 +85,10 @@ def _parseModuleTag(moduleTag):
         id = _getIdFromString(str(moduleTag.get('id')))
         if id:
             _printWorkitem(id)
+        else:
+            #print moduleTag.text
+            # https://github.com/purcell/airspeed
+            pass
     else:                                                   # ignore these tags
         pass
 

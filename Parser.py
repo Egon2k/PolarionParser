@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import re
 import os
+import datetime
 
 #print BeautifulSoup(open('workitem.xml'), 'html.parser').find(id="status").text
 #print BeautifulSoup(open('workitem.xml'), 'html.parser').find("field", id="status").text
@@ -138,14 +139,15 @@ if 0 < selectedModule < len(moduleDict):
 
     contentSoup = BeautifulSoup(_getFieldByAttrName(moduleSoup, "homePageContent"), 'html.parser')
 
-    f = open("index.html", 'w')
+    filename = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + _getFieldByAttrName(moduleSoup, "title").replace(" ", "_") + ".html"
+    f = open(filename, 'w')
 
     for tag in contentSoup:
         _parseModuleTag(tag)
 
     f.close
 
-    os.startfile("index.html")
+    os.startfile(filename)
 
 else:
     print "Input out of range - start again."

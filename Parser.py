@@ -67,17 +67,17 @@ def _printWorkitem(id):
     f.write("</div>")
     f.write("</p>")
     
-def _parseWorkitem(tag):
+def _parseModuleTag(moduleTag):
     # decide what type of workitem it is
-    if str(tag.name).startswith('h'):                   # heading
-        id = _getIdFromString(str(tag.get('id')))
+    if str(moduleTag.name).startswith('h'):                 # heading
+        id = _getIdFromString(str(moduleTag.get('id')))
         if id:
-            _printHeading(id, str(tag.name))
-    elif str(tag.name).startswith('div'):               # normal workitems
-        id = _getIdFromString(str(tag.get('id')))
+            _printHeading(id, str(moduleTag.name))
+    elif str(moduleTag.name).startswith('div'):             # normal workitems
+        id = _getIdFromString(str(moduleTag.get('id')))
         if id:
             _printWorkitem(id)
-    else:                                               # ignore these tags
+    else:                                                   # ignore these tags
         pass
     
     
@@ -110,7 +110,7 @@ if 0 < selectedModule < len(moduleDict):
     f = open("index.html", 'w')
     
     for tag in contentSoup:
-        _parseWorkitem(tag)
+        _parseModuleTag(tag)
         
     f.close
 

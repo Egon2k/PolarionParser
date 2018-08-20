@@ -11,7 +11,7 @@ workitemDict = dict()            # dict for all workitems in repo
 
 REMOVE_ATTRIBUTES = [
     'style','font','size','color']
-    
+
 EXCLUDE_FROM_ATTRIBUTE_REMOVAL = [
     'table','tbody','tr','th','td']
 
@@ -59,10 +59,10 @@ def _printWorkitem(id):
     f.write("<p>")
     f.write("<div style=\"border: thin solid black\">")
     f.write("<b>" + id + " - " + _getFieldByAttrName(workitemSoup, "title") + "</b></br>")       # id + title in bold
-    
+
     descriptionSoup = BeautifulSoup(_getFieldByAttrName(workitemSoup, "description"), 'html.parser')
     descriptionSoup = _removeDefinedAttributes(descriptionSoup)
-    
+
     for linkedWorkitem in descriptionSoup.find_all('span'):
         if linkedWorkitem.get('data-item-id'):
            # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#replace-with
@@ -70,11 +70,11 @@ def _printWorkitem(id):
            new_tag.string = linkedWorkitem.get('data-item-id').encode('utf-8') + " - " +  _getTitleFromId(linkedWorkitem.get('data-item-id'))
            #print linkedWorkitem.get('data-item-id')
            linkedWorkitem.replace_with(new_tag)
-           
+
     f.write(descriptionSoup.prettify().encode('utf-8'))
     f.write("</div>")
     f.write("</p>\n")
-    
+
 def _parseModuleTag(moduleTag):
     # decide what type of workitem it is
     if str(moduleTag.name).startswith('h'):                 # heading
@@ -98,19 +98,19 @@ def _removeDefinedAttributes(soup):
       if tag.name not in EXCLUDE_FROM_ATTRIBUTE_REMOVAL:
          if hasattr(tag, 'attrs'):
             tag.attrs = {key:value for key,value in tag.attrs.iteritems() if key not in REMOVE_ATTRIBUTES}
-   return soup        
-    
-    
+   return soup
+
+
 ##################################################################################
 ##################################################################################
 
 # generate dicts
 _analyseFolderStruct()
-  
-# print module dict 
+
+# print module dict
 for module in moduleDict:
     print module, moduleDict[module]
-    
+
 # ask user for a number
 rawNumber = raw_input('Choose a number: ')
 
@@ -119,22 +119,22 @@ try:
 except ValueError:
     print("Invalid number")
     exit()
-    
+
 if 0 < selectedModule < len(moduleDict):
     moduleSoup = BeautifulSoup(open(moduleDict[selectedModule]), 'html.parser')
     print "Author: " + _getFieldByAttrName(moduleSoup, "author")
     print "Created: " + _getFieldByAttrName(moduleSoup, "created")
-    
+
     contentSoup = BeautifulSoup(_getFieldByAttrName(moduleSoup, "homePageContent"), 'html.parser')
-    
+
     f = open("index.html", 'w')
-    
+
     for tag in contentSoup:
         _parseModuleTag(tag)
-        
+
     f.close
 
     os.startfile("index.html")
-        
+
 else:
     print "Input out of range - start again."

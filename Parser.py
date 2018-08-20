@@ -52,7 +52,7 @@ def _printHeading(id, headingLevel):
     workitemSoup = BeautifulSoup(open(workitemDict[id]), 'html.parser')
     f.write("<"  + headingLevel + ">")
     f.write(_getFieldByAttrName(workitemSoup, "title"))
-    f.write("</" + headingLevel + ">")
+    f.write("</" + headingLevel + ">\n")
 
 def _printWorkitem(id):
     workitemSoup = BeautifulSoup(open(workitemDict[id]), 'html.parser')
@@ -73,7 +73,7 @@ def _printWorkitem(id):
            
     f.write(descriptionSoup.prettify().encode('utf-8'))
     f.write("</div>")
-    f.write("</p>")
+    f.write("</p>\n")
     
 def _parseModuleTag(moduleTag):
     # decide what type of workitem it is

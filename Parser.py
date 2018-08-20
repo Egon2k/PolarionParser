@@ -9,11 +9,11 @@ import os
 moduleDict = dict()              # dict for all documents in repo
 workitemDict = dict()            # dict for all workitems in repo
 
-REMOVE_ATTRIBUTES = [
-    'style','font','size','color']
+TEXT_REMOVE_ATTRIBUTES = [
+    'style','font','size','color','border-collapse']
 
-EXCLUDE_FROM_ATTRIBUTE_REMOVAL = [
-    'table','tbody','tr','th','td']
+TABLE_REMOVE_ATTRIBUTES = [
+    'border-collapse']
 
 
 def _analyseFolderStruct():
@@ -23,7 +23,7 @@ def _analyseFolderStruct():
             # save all documents in dict
             if file.endswith("module.xml"):
                 moduleDict[numberOfDocuments] = os.path.join(root, file)
-                numberOfDocuments =  numberOfDocuments + 1
+                numberOfDocuments = numberOfDocuments + 1
             # safe all workitems in dict
             if file.endswith("workitem.xml"):
                 id = re.search('\\\([a-zA-Z_]*-\d{1,6})', root)
@@ -92,13 +92,24 @@ def _parseModuleTag(moduleTag):
     else:                                                   # ignore these tags
         pass
 
+def _removeDefinedAttributesFromText(tag):
+    if hasattr(tag, 'attrs'):
+        tag.attrs = {key:value for key,value in tag.attrs.iteritems() if key not in TEXT_REMOVE_ATTRIBUTES}
+    return tag
+
+def _removeDefinedAttributesFromTable(tag):
+    if hasattr(tag, 'attrs'):
+        tag.attrs = {key:value for key,value in tag.attrs.iteritems() if key not in TABLE_REMOVE_ATTRIBUTES}
+    return tag
+
 def _removeDefinedAttributes(soup):
-   ##https://stackoverflow.com/a/39976027
-   for tag in soup.recursiveChildGenerator():
-      if tag.name not in EXCLUDE_FROM_ATTRIBUTE_REMOVAL:
-         if hasattr(tag, 'attrs'):
-            tag.attrs = {key:value for key,value in tag.attrs.iteritems() if key not in REMOVE_ATTRIBUTES}
-   return soup
+    # https://stackoverflow.com/a/39976027
+    for tag in soup.recursiveChildGenerator():
+        if tag.name not in ['table','tbody','tr','th','td']:
+            tag = _removeDefinedAttributesFromText(tag)
+        else:
+            tag = _removeDefinedAttributesFromTable(tag)
+    return soup
 
 
 ##################################################################################

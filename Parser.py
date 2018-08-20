@@ -67,7 +67,7 @@ def _printWorkitem(id):
         if linkedWorkitem.get('data-item-id'):
            # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#replace-with
            new_tag = descriptionSoup.new_tag("font color=\"blue\"")
-           new_tag.string = linkedWorkitem.get('data-item-id') + " - " +  _getTitleFromId(linkedWorkitem.get('data-item-id'))
+           new_tag.string = linkedWorkitem.get('data-item-id').encode('utf-8') + " - " +  _getTitleFromId(linkedWorkitem.get('data-item-id'))
            #print linkedWorkitem.get('data-item-id')
            linkedWorkitem.replace_with(new_tag)
            

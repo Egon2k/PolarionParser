@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from shutil import copyfile
 import re
 import os
 import datetime
@@ -9,6 +10,9 @@ import datetime
 # globals
 moduleDict = dict()              # dict for all documents in repo
 workitemDict = dict()            # dict for all workitems in repo
+imageDict = dict()               # dict for all images (*.png, *jpg)
+
+imageDir = './img/'
 
 TEXT_REMOVE_ATTRIBUTES = [
     'style','font','size','color','border-collapse']
@@ -31,6 +35,9 @@ def _analyseFolderStruct():
                 if id:
                     workitemDict[id.group(1)] = os.path.join(root, file)
                     #print id.group(1), os.path.join(root, file)
+            # safe all images in dict
+            if file.endswith(('jpg','png')):
+                imageDict[file] = os.path.join(root, file)
 
 def _getFieldByAttrName(soup, attrName):
     value = soup.find("field", id=attrName)
@@ -66,11 +73,29 @@ def _printWorkitem(id):
 
     for linkedWorkitem in descriptionSoup.find_all('span'):
         if linkedWorkitem.get('data-item-id'):
-           # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#replace-with
-           new_tag = descriptionSoup.new_tag("font color=\"blue\"")
-           new_tag.string = linkedWorkitem.get('data-item-id').encode('utf-8') + " - " +  _getTitleFromId(linkedWorkitem.get('data-item-id'))
-           #print linkedWorkitem.get('data-item-id')
-           linkedWorkitem.replace_with(new_tag)
+            # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#replace-with
+            new_tag = descriptionSoup.new_tag("font color=\"blue\"")
+            new_tag.string = linkedWorkitem.get('data-item-id').encode('utf-8') + " - " +  _getTitleFromId(linkedWorkitem.get('data-item-id'))
+            # print linkedWorkitem.get('data-item-id')
+            linkedWorkitem.replace_with(new_tag)
+
+    for attachment in descriptionSoup.find_all('img'):
+        if attachment.get('src'):
+            #print attachment.get('src')
+
+            if not os.path.exists(imageDir):
+                os.makedirs(imageDir)
+
+            if attachment.get('src').startswith("attachment:"):
+                copyfile(imageDict[attachment.get('src')[11:]], imageDir + attachment.get('src')[11:])
+                new_tag = descriptionSoup.new_tag('img', src=imageDir + attachment.get('src')[11:], align="middle")
+                attachment.replace_with(new_tag)
+            elif attachment.get('src').startswith("workitemimg:"):
+                pass
+            else:
+                pass
+
+            #copy(imageDict[attachment.get('src').text[11:], '/img/'])
 
     f.write(descriptionSoup.prettify().encode('utf-8'))
     f.write("</div>")
@@ -122,6 +147,11 @@ _analyseFolderStruct()
 # print module dict
 for module in moduleDict:
     print module, moduleDict[module]
+
+#for img in imageDict:
+#    #print img, imageDict[img], "\n"
+#    if img.startswith('15'):
+#        print img, imageDict[img], "\n"
 
 # ask user for a number
 rawNumber = raw_input('Choose a number: ')

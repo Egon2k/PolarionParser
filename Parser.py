@@ -91,7 +91,10 @@ def _printWorkitem(id):
                 new_tag = descriptionSoup.new_tag('img', src=imageDir + attachment.get('src')[11:], align="middle")
                 attachment.replace_with(new_tag)
             elif attachment.get('src').startswith("workitemimg:"):
-                pass
+                #print "ID: " + id
+                copyfile(imageDict['attachment' + attachment.get('src')[12:]], imageDir + attachment.get('src')[12:])
+                new_tag = descriptionSoup.new_tag('img', src=imageDir + attachment.get('src')[12:], align="middle")
+                attachment.replace_with(new_tag)
             else:
                 pass
 
@@ -152,6 +155,8 @@ for module in moduleDict:
 #    #print img, imageDict[img], "\n"
 #    if img.startswith('15'):
 #        print img, imageDict[img], "\n"
+#
+#exit()
 
 # ask user for a number
 rawNumber = raw_input('Choose a number: ')

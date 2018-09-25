@@ -78,6 +78,8 @@ def _printWorkitem(id):
             new_tag.string = linkedWorkitem.get('data-item-id').encode('utf-8') + " - " +  _getTitleFromId(linkedWorkitem.get('data-item-id'))
             # print linkedWorkitem.get('data-item-id')
             linkedWorkitem.replace_with(new_tag)
+        else:
+            linkedWorkitem.replace_with(linkedWorkitem.getText())
 
     for attachment in descriptionSoup.find_all('img'):
         if attachment.get('src'):

@@ -4,8 +4,8 @@ import re
 import os
 import datetime
 
-#print BeautifulSoup(open('workitem.xml'), 'html.parser').find(id="status").text
-#print BeautifulSoup(open('workitem.xml'), 'html.parser').find("field", id="status").text
+#print BeautifulSoup(open('workitem.xml', from_encoding='UTF-8'), 'html.parser').find(id="status").text
+#print BeautifulSoup(open('workitem.xml', from_encoding='UTF-8'), 'html.parser').find("field", id="status").text
 
 # globals
 moduleDict = dict()              # dict for all documents in repo
@@ -47,7 +47,7 @@ def _getFieldByAttrName(soup, attrName):
         return "id \"" + attrName + "\" not found"
 
 def _getTitleFromId(id):
-    workitemSoup = BeautifulSoup(open(workitemDict[id]), 'html.parser')
+    workitemSoup = BeautifulSoup(open(workitemDict[id]), 'html.parser', from_encoding='UTF-8')
     return _getFieldByAttrName(workitemSoup, "title")
 
 
@@ -57,18 +57,18 @@ def _getIdFromString(string):
       return id.group(1)
 
 def _printHeading(id, headingLevel):
-    workitemSoup = BeautifulSoup(open(workitemDict[id]), 'html.parser')
+    workitemSoup = BeautifulSoup(open(workitemDict[id]), 'html.parser', from_encoding='UTF-8')
     f.write("<"  + headingLevel + ">")
     f.write(_getFieldByAttrName(workitemSoup, "title"))
     f.write("</" + headingLevel + ">\n")
 
 def _printWorkitem(id):
-    workitemSoup = BeautifulSoup(open(workitemDict[id]), 'html.parser')
+    workitemSoup = BeautifulSoup(open(workitemDict[id]), 'html.parser', from_encoding='UTF-8')
     f.write("<p>")
     f.write("<div style=\"border: thin solid black\">")
     f.write("<b>" + id + " - " + _getFieldByAttrName(workitemSoup, "title") + "</b></br>")       # id + title in bold
 
-    descriptionSoup = BeautifulSoup(_getFieldByAttrName(workitemSoup, "description"), 'html.parser')
+    descriptionSoup = BeautifulSoup(_getFieldByAttrName(workitemSoup, "description"), 'html.parser', from_encoding='UTF-8')
     descriptionSoup = _removeDefinedAttributes(descriptionSoup)
 
     for linkedWorkitem in descriptionSoup.find_all('span'):
@@ -168,11 +168,11 @@ except ValueError:
     exit()
 
 if 0 < selectedModule < len(moduleDict):
-    moduleSoup = BeautifulSoup(open(moduleDict[selectedModule]), 'html.parser')
+    moduleSoup = BeautifulSoup(open(moduleDict[selectedModule]), 'html.parser', from_encoding='UTF-8')
     print "Author: " + _getFieldByAttrName(moduleSoup, "author")
     print "Created: " + _getFieldByAttrName(moduleSoup, "created")
 
-    contentSoup = BeautifulSoup(_getFieldByAttrName(moduleSoup, "homePageContent"), 'html.parser')
+    contentSoup = BeautifulSoup(_getFieldByAttrName(moduleSoup, "homePageContent"), 'html.parser', from_encoding='UTF-8')
 
     filename = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + _getFieldByAttrName(moduleSoup, "title").replace(" ", "_") + ".html"
     f = open(filename, 'w')

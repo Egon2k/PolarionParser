@@ -101,10 +101,10 @@ analyseFolderStruct()
    
 # print module dict 
 for module in moduleDict:
-   print module, moduleDict[module]
+   print (module, moduleDict[module])
    
 # ask user for a number
-rawNumber = raw_input('Choose a number: ')
+rawNumber = input('Choose a number: ')
 
 try:
     selectedModule = int(rawNumber)
@@ -142,7 +142,7 @@ for tag in soup:
       if id:
          #print id.group(1)
          f.write("<"  + str(tag.name) + ">")
-         f.write(getTitleFromWorkitem(id))
+         f.write(str(getTitleFromWorkitem(id)))
          f.write("</" + str(tag.name) + ">")
    if str(tag.name).startswith('div'):                    # workitem
       id = getIdFromString(str(tag.get('id')))
@@ -167,7 +167,7 @@ for tag in soup:
             if span.get('data-item-id'):
                # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#replace-with
                new_tag = soup.new_tag("font color=\"blue\"")
-               new_tag.string = span.get('data-item-id') + " - " +  getTitleFromWorkitem(span.get('data-item-id'))
+               new_tag.string = span.get('data-item-id') + " - " +  str(getTitleFromWorkitem(span.get('data-item-id')))
                #print span.get('data-item-id')
                span.replace_with(new_tag)
          
@@ -177,9 +177,9 @@ for tag in soup:
          #description = re.sub(r'<span class="polarion-rte-link" data-type="workItem" id="fake" data-item-id="([a-zA-Z]*-\d{1,6})" data-option-id="long"></span>', getIdAndTitleFromRegex , subsoup.encode('utf-8'))
          
          f.write("<b>")
-         f.write(id + " " + getTitleFromWorkitem(id))
+         f.write(id + " " + str(getTitleFromWorkitem(id)))
          f.write("</b></br>")
-         f.write(subsoup.prettify().encode('utf-8'))
+         f.write(str(subsoup.prettify().encode('utf-8')))
          f.write("</br>")
 
 f.close

@@ -102,7 +102,7 @@ def _printWorkitem(id):
 
             #copy(imageDict[attachment.get('src').text[11:], '/img/'])
 
-    f.write(descriptionSoup.prettify().encode('utf-8'))
+    f.write(descriptionSoup.prettify().encode('utf-8').replace('\r', '').replace('\n', ''))
     f.write("</div>")
     f.write("</p>\n")
 
